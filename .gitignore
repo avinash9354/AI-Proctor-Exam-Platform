@@ -1,0 +1,60 @@
+# Monorepo
+node_modules/
+dist/
+.turbo/
+*.log
+.DS_Store
+
+# Environment files
+.env
+.env.local
+.env.production
+!.env.example
+
+# Build outputs
+.next/
+out/
+build/
+
+# Electron
+apps/secure-browser/release/
+
+# React Native
+apps/mobile-proctor/.expo/
+apps/mobile-proctor/android/app/build/
+apps/mobile-proctor/ios/Pods/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+*.egg-info/
+dist/
+*.egg
+.pytest_cache/
+.mypy_cache/
+services/ai-service/models/
+
+# Database
+*.db
+*.sqlite
+
+# Coverage
+coverage/
+.nyc_output/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Prisma
+packages/database/prisma/migrations/
+
+# Docker volumes
+data/

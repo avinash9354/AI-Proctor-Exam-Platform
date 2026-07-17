@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body { background: #0a0e1a; color: #e8eaf6; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #0f1629; }
+  ::-webkit-scrollbar-thumb { background: #1e2d50; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #4c7ef3; }
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-[#1e2d50] bg-[#141d33] p-5 shadow-xl; }
+  .card-hover { @apply card transition-all duration-200 hover:border-[#4c7ef3]/30 hover:shadow-[0_0_20px_rgba(76,126,243,0.08)]; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-150 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply btn bg-[#4c7ef3] text-white hover:bg-[#3b6de0]; box-shadow: 0 4px 14px rgba(76,126,243,0.3); }
+  .btn-secondary { @apply btn bg-[#1a2540] text-[#e8eaf6] border border-[#1e2d50] hover:bg-[#1e2d50]; }
+  .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+  .btn-ghost { @apply btn bg-transparent text-[#8892b0] hover:text-[#e8eaf6] hover:bg-[#1a2540]; }
+  .input { @apply w-full rounded-xl border border-[#1e2d50] bg-[#0f1629] px-4 py-2.5 text-[#e8eaf6] text-sm placeholder:text-[#4a5568] focus:outline-none focus:border-[#4c7ef3] transition-colors; }
+  .label { @apply block text-xs font-semibold uppercase tracking-wider text-[#8892b0] mb-1.5; }
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .nav-item { @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#8892b0] transition-all hover:bg-[#1a2540] hover:text-[#e8eaf6] cursor-pointer; }
+  .nav-item-active { @apply nav-item bg-[#1a2540] text-[#4c7ef3] border border-[#1e2d50]; }
+  .glass { background: rgba(20,29,51,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(30,45,80,0.8); }
+  .gradient-text { @apply bg-clip-text text-transparent; background-image: linear-gradient(135deg, #4c7ef3, #7c3aed); }
+  /* Risk badges */
+  .risk-green  { @apply badge bg-emerald-900/40 text-emerald-400 border border-emerald-700/30; }
+  .risk-yellow { @apply badge bg-amber-900/40 text-amber-400 border border-amber-700/30; }
+  .risk-orange { @apply badge bg-orange-900/40 text-orange-400 border border-orange-700/30; }
+  .risk-red    { @apply badge bg-red-900/40 text-red-400 border border-red-700/30; }
+}

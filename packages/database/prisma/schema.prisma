@@ -1,0 +1,274 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:/Users/avinashpandey/Desktop/App/packages/database/prisma/dev.db"
+}
+
+// ─── RBAC ────────────────────────────────────────────────────────────────────
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  permissions Permission[]
+  users       User[]
+  createdAt   DateTime     @default(now())
+
+  @@map("roles")
+}
+
+model Permission {
+  id       String @id @default(uuid())
+  roleId   String
+  resource String
+  action   String
+  role     Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, resource, action])
+  @@map("permissions")
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  roleId       String
+  rollNumber   String?   @unique
+  department   String?
+  semester     Int?
+  photoUrl     String?
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  role          Role           @relation(fields: [roleId], references: [id])
+  sessions      ExamSession[]
+  submissions   Submission[]
+  notifications Notification[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]     @relation("AdminAuditLogs")
+  enrollments   Enrollment[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// ─── Exams ───────────────────────────────────────────────────────────────────
+
+model Exam {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  type            String   // mcq | msq | subjective | coding | typing
+  startTime       DateTime
+  endTime         DateTime
+  durationMinutes Int
+  totalMarks      Int
+  passMarks       Int?
+  policyConfig    String   @default("{}")
+  isPublished     Boolean  @default(false)
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  questions   Question[]
+  sessions    ExamSession[]
+  enrollments Enrollment[]
+
+  @@map("exams")
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  examId    String
+  studentId String
+  createdAt DateTime @default(now())
+
+  exam    Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, studentId])
+  @@map("enrollments")
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  examId      String
+  type        String   // mcq | msq | subjective | coding | typing
+  payload     String
+  marks       Int
+  negativeMarks Int    @default(0)
+  sectionName String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  submissions Submission[]
+
+  @@map("questions")
+}
+
+// ─── Sessions ────────────────────────────────────────────────────────────────
+
+model ExamSession {
+  id             String    @id @default(uuid())
+  examId         String
+  studentId      String
+  status         String    @default("not_started") // SessionStatus enum
+  riskScore      Int       @default(0)
+  riskLevel      String    @default("green")        // RiskLevel enum
+  consentGiven   Boolean   @default(false)
+  consentAt      DateTime?
+  consentIp      String?
+  startedAt      DateTime?
+  endedAt        DateTime?
+  warningCount   Int       @default(0)
+  isBlocked      Boolean   @default(false)
+  streamToken    String?   @unique
+  deviceInfo     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  exam        Exam         @relation(fields: [examId], references: [id])
+  student     User         @relation(fields: [studentId], references: [id])
+  submissions Submission[]
+  aiEvents    AIEvent[]
+  violations  Violation[]
+  recordings  Recording[]
+  auditLogs   AuditLog[]
+
+  @@unique([examId, studentId])
+  @@map("exam_sessions")
+}
+
+model Submission {
+  id              String   @id @default(uuid())
+  sessionId       String
+  questionId      String
+  studentId       String?
+  answer          String
+  score           Int?
+  maxScore        Int?
+  timeSpentSeconds Int?
+  submittedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  gradedAt        DateTime?
+  gradedBy        String?
+
+  session  ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id])
+  student  User?       @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, questionId])
+  @@map("submissions")
+}
+
+// ─── AI & Proctoring ─────────────────────────────────────────────────────────
+
+model AIEvent {
+  id          String   @id @default(uuid())
+  sessionId   String
+  source      String   // AIEventSource enum
+  eventType   String   // AIEventType enum
+  confidence  Float
+  evidenceRef String?
+  metadata    String?
+  timestamp   DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("ai_events")
+}
+
+model Violation {
+  id            String    @id @default(uuid())
+  sessionId     String
+  type          String    // AIEventType
+  warningNumber Int
+  status        String    @default("pending_review") // ViolationStatus
+  confidence    Float
+  evidenceRef   String?
+  reviewedBy    String?
+  reviewNotes   String?
+  reviewedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("violations")
+}
+
+model Recording {
+  id              String   @id @default(uuid())
+  sessionId       String
+  source          String   // webcam | phone_cam | screen
+  storagePath     String
+  durationSeconds Int?
+  checksum        String?
+  sizeBytes       BigInt?
+  chunkIndex      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("recordings")
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(uuid())
+  recipientId String
+  channel     String   // websocket | email | sms
+  type        String
+  title       String?
+  message     String
+  isRead      Boolean  @default(false)
+  metadata    String?
+  createdAt   DateTime @default(now())
+
+  recipient User @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ─── Audit Logs ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id              String   @id @default(uuid())
+  adminId         String
+  action          String
+  targetSessionId String?
+  targetStudentId String?
+  reason          String
+  metadata        String?
+  createdAt       DateTime @default(now())
+
+  admin   User         @relation("AdminAuditLogs", fields: [adminId], references: [id])
+  session ExamSession? @relation(fields: [targetSessionId], references: [id])
+
+  @@map("audit_logs")
+}

@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { apiClient } from '@/lib/apiClient';
 import {
   LayoutDashboard, BookOpen, Clock, CheckCircle,
-  Shield, LogOut, User, History, Settings,
+  Shield, LogOut, User, History, Settings, Bell, HelpCircle, Download
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import clsx from 'clsx';
@@ -14,7 +14,12 @@ const NAV_ITEMS = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/dashboard/exams', icon: BookOpen, label: 'My Exams' },
   { href: '/dashboard/history', icon: History, label: 'Exam History' },
-  { href: '/dashboard/profile', icon: User, label: 'Profile' },
+  { href: '/dashboard/results', icon: CheckCircle, label: 'Results & Feedback' },
+  { href: '/dashboard/notifications', icon: Bell, label: 'Notifications' },
+  { href: '/dashboard/profile', icon: User, label: 'My Profile' },
+  { href: '/dashboard/settings', icon: Settings, label: 'Account Settings' },
+  { href: '/dashboard/support', icon: HelpCircle, label: 'Help & Support' },
+  { href: '/dashboard/downloads', icon: Download, label: 'Secure Browser' },
 ];
 
 export function DashboardSidebar() {

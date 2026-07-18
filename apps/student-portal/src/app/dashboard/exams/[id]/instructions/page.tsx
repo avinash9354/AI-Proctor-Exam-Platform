@@ -61,7 +61,8 @@ export default function ExamInstructionsPage() {
     queryFn: () => examClient.get(`/exams/${examId}`).then((r) => r.data.data),
   });
 
-  const policy = (exam?.policyConfig || {}) as Record<string, unknown>;
+  const rawPolicy = exam?.policyConfig;
+  const policy = (typeof rawPolicy === 'string' ? (() => { try { return JSON.parse(rawPolicy); } catch { return {}; } })() : rawPolicy || {}) as Record<string, unknown>;
 
   const handleStartExam = async () => {
     if (!consentChecked) {

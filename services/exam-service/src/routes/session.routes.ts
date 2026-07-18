@@ -28,7 +28,10 @@ sessionRouter.post('/start', authenticate, requireRole(UserRole.STUDENT), async 
     }
 
     const now = new Date();
-    const lateJoinWindow = ((exam.policyConfig as Record<string, unknown>).allowedLateJoinMinutes as number || 10) * 60 * 1000;
+    const policyConfig = (typeof exam.policyConfig === 'string'
+      ? JSON.parse(exam.policyConfig)
+      : (exam.policyConfig || {})) as Record<string, unknown>;
+    const lateJoinWindow = ((policyConfig.allowedLateJoinMinutes as number) || 10) * 60 * 1000;
     if (now < exam.startTime || now > new Date(exam.endTime.getTime() + lateJoinWindow)) {
       res.status(400).json({ success: false, error: 'Exam is not currently active' });
       return;
@@ -129,11 +132,38 @@ sessionRouter.post('/:id/answer', authenticate, requireRole(UserRole.STUDENT), a
 
     const submission = await prisma.submission.upsert({
       where: { sessionId_questionId: { sessionId, questionId } },
-      update: { answer, timeSpentSeconds, updatedAt: new Date() },
-      create: { sessionId, questionId, answer, timeSpentSeconds },
+      update: {
+        answer: typeof answer === 'string' ? answer : JSON.stringify(answer),
+        timeSpentSeconds,
+        updatedAt: new Date(),
+      },
+      create: {
+        sessionId,
+        questionId,
+        answer: typeof answer === 'string' ? answer : JSON.stringify(answer),
+        timeSpentSeconds,
+      },
     });
 
     res.json({ success: true, data: { id: submission.id, savedAt: new Date() } });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /sessions/my — get all sessions for the authenticated student
+sessionRouter.get('/my', authenticate, requireRole(UserRole.STUDENT), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const sessions = await prisma.examSession.findMany({
+      where: { studentId: req.user!.id },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        exam: { select: { title: true, durationMinutes: true, policyConfig: true } },
+        submissions: true,
+        _count: { select: { violations: true, aiEvents: true } },
+      },
+    });
+    res.json({ success: true, data: { sessions } });
   } catch (err) {
     next(err);
   }
@@ -172,10 +202,18 @@ sessionRouter.get('/:id/pairing-qr', authenticate, requireRole(UserRole.STUDENT)
     const pairingToken = uuidv4();
     const expiresAt = new Date(Date.now() + 60 * 1000); // 60s
 
-    // Store pairing token in session metadata
+    const currentDeviceInfo = typeof session.deviceInfo === 'string'
+      ? JSON.parse(session.deviceInfo)
+      : (session.deviceInfo || {});
     await prisma.examSession.update({
       where: { id: sessionId },
-      data: { deviceInfo: { ...(session.deviceInfo as object || {}), pairingToken, pairingTokenExpiresAt: expiresAt.toISOString() } },
+      data: {
+        deviceInfo: JSON.stringify({
+          ...(currentDeviceInfo as Record<string, unknown>),
+          pairingToken,
+          pairingTokenExpiresAt: expiresAt.toISOString(),
+        }),
+      },
     });
 
     const qrPayload = {

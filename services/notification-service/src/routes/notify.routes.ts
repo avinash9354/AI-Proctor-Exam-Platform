@@ -53,3 +53,57 @@ notifyRouter.post('/student', async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'Failed to notify student' });
   }
 });
+
+// In-memory store of recent system and exam alerts for instant delivery
+const recentNotifications: Array<{
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  read: boolean;
+  createdAt: string;
+}> = [
+  {
+    id: 'notif-1',
+    title: 'Welcome to ExamGuard Portal',
+    message: 'Your system setup and biometric profile are ready. Check compatibility before starting examinations.',
+    type: 'system',
+    read: false,
+    createdAt: new Date(Date.now() - 3600 * 1000 * 2).toISOString(),
+  },
+  {
+    id: 'notif-2',
+    title: 'Upcoming Exam Reminder',
+    message: 'Advanced Software Architecture examination window opens soon. Please ensure your secure browser is updated.',
+    type: 'exam',
+    read: false,
+    createdAt: new Date(Date.now() - 3600 * 1000 * 12).toISOString(),
+  },
+  {
+    id: 'notif-3',
+    title: 'AI Proctoring Policy Notice',
+    message: 'Strict multi-angle monitoring (Webcam + Mobile QR) is active for high-security assessments.',
+    type: 'alert',
+    read: true,
+    createdAt: new Date(Date.now() - 3600 * 1000 * 24).toISOString(),
+  },
+];
+
+// GET / — return notification feed
+notifyRouter.get('/', async (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    data: {
+      notifications: recentNotifications,
+      unreadCount: recentNotifications.filter((n) => !n.read).length,
+    },
+  });
+});
+
+// PATCH /:id/read — mark as read
+notifyRouter.patch('/:id/read', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const notif = recentNotifications.find((n) => n.id === id);
+  if (notif) notif.read = true;
+  res.json({ success: true, data: { id, read: true } });
+});

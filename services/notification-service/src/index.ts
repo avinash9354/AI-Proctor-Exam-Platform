@@ -68,6 +68,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.use('/v1/notify', notifyRouter);
+app.use('/v1/notifications', notifyRouter);
 
 httpServer.listen(PORT, () => {
   logger.info(`🚀 Notification service running on port ${PORT}`);

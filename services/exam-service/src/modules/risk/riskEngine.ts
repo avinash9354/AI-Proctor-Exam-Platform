@@ -61,7 +61,9 @@ export async function processAIEvent(event: AIEventInput): Promise<RiskEngineRes
   }
 
   // ─── Get custom weights from policy config ────────────────────────────────
-  const policyConfig = session.exam.policyConfig as Record<string, unknown>;
+  const policyConfig = (typeof session.exam.policyConfig === 'string'
+    ? JSON.parse(session.exam.policyConfig)
+    : session.exam.policyConfig || {}) as Record<string, unknown>;
   const customWeights = (policyConfig.riskWeights || {}) as Partial<Record<AIEventType, number>>;
   const weight = customWeights[event.eventType] ?? DEFAULT_RISK_WEIGHTS[event.eventType] ?? 0;
 
@@ -79,7 +81,7 @@ export async function processAIEvent(event: AIEventInput): Promise<RiskEngineRes
       eventType: event.eventType,
       confidence: event.confidence,
       evidenceRef: event.evidenceRef,
-      metadata: event.metadata,
+      metadata: event.metadata ? (typeof event.metadata === 'string' ? event.metadata : JSON.stringify(event.metadata)) : undefined,
       timestamp: new Date(event.timestamp),
     },
   });

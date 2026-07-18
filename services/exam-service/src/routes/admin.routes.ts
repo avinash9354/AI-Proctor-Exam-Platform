@@ -247,3 +247,100 @@ adminRouter.get('/analytics/exam/:examId', async (req: AuthRequest, res: Respons
     next(err);
   }
 });
+
+// ─── System Settings Management ──────────────────────────────────────────────
+
+// GET /admin/settings — fetch system settings (optional ?category=filter)
+adminRouter.get('/settings', async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { category } = req.query;
+    const where = category ? { category: category as string } : {};
+    const settings = await prisma.systemSetting.findMany({
+      where,
+      orderBy: { key: 'asc' },
+    });
+    res.json({ success: true, data: settings });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// PUT /admin/settings and POST /admin/settings — upsert system settings
+const handleUpsertSettings = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { category: bodyCategory, settings: bodySettings } = req.body;
+    const itemsToUpsert: Array<{ key: string; value: string; category: string }> = [];
+
+    if (Array.isArray(bodySettings)) {
+      // Format A: { settings: [{ key, value, category? }, ...] }
+      for (const item of bodySettings) {
+        if (!item || !item.key) continue;
+        const key = String(item.key);
+        const value = typeof item.value === 'string' ? item.value : JSON.stringify(item.value);
+        const category = item.category || bodyCategory || (key.includes('.') ? key.split('.')[0] : 'general');
+        itemsToUpsert.push({ key, value, category });
+      }
+    } else if (bodySettings && typeof bodySettings === 'object') {
+      // Format B: { category: 'general', settings: { key1: value1, ... } }
+      for (const [key, rawValue] of Object.entries(bodySettings)) {
+        const value = typeof rawValue === 'string' ? rawValue : JSON.stringify(rawValue);
+        const category = bodyCategory || (key.includes('.') ? key.split('.')[0] : 'general');
+        itemsToUpsert.push({ key, value, category });
+      }
+    } else if (typeof req.body === 'object') {
+      // Format C: Direct key-value pairs in body { key1: value1 } or array
+      if (Array.isArray(req.body)) {
+        for (const item of req.body) {
+          if (!item || !item.key) continue;
+          const key = String(item.key);
+          const value = typeof item.value === 'string' ? item.value : JSON.stringify(item.value);
+          const category = item.category || (key.includes('.') ? key.split('.')[0] : 'general');
+          itemsToUpsert.push({ key, value, category });
+        }
+      } else {
+        for (const [key, rawValue] of Object.entries(req.body)) {
+          if (['category', 'settings'].includes(key)) continue;
+          const value = typeof rawValue === 'string' ? rawValue : JSON.stringify(rawValue);
+          const category = bodyCategory || (key.includes('.') ? key.split('.')[0] : 'general');
+          itemsToUpsert.push({ key, value, category });
+        }
+      }
+    }
+
+    if (itemsToUpsert.length === 0) {
+      res.status(400).json({ success: false, error: 'No valid settings provided to update' });
+      return;
+    }
+
+    const updatedSettings = [];
+    for (const item of itemsToUpsert) {
+      const setting = await prisma.systemSetting.upsert({
+        where: { key: item.key },
+        update: {
+          value: item.value,
+          category: item.category,
+          updatedBy: req.user?.id,
+        },
+        create: {
+          key: item.key,
+          value: item.value,
+          category: item.category,
+          updatedBy: req.user?.id,
+        },
+      });
+      updatedSettings.push(setting);
+    }
+
+    res.json({
+      success: true,
+      message: 'Settings updated successfully',
+      data: updatedSettings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+adminRouter.put('/settings', handleUpsertSettings);
+adminRouter.post('/settings', handleUpsertSettings);
+

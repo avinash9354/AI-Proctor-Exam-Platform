@@ -46,9 +46,9 @@ userRouter.get('/', authenticate, requireRole(UserRole.ADMIN, UserRole.SUPER_ADM
         ...(role ? { role: { name: role as string } } : {}),
         ...(search ? {
           OR: [
-            { name: { contains: search as string, mode: 'insensitive' } },
-            { email: { contains: search as string, mode: 'insensitive' } },
-            { rollNumber: { contains: search as string, mode: 'insensitive' } },
+            { name: { contains: search as string } },
+            { email: { contains: search as string } },
+            { rollNumber: { contains: search as string } },
           ],
         } : {}),
       },
@@ -60,6 +60,48 @@ userRouter.get('/', authenticate, requireRole(UserRole.ADMIN, UserRole.SUPER_ADM
     });
 
     res.json({ success: true, data: users });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── GET /users/roles (admin only) ────────────────────────────────────────────
+userRouter.get('/roles', authenticate, requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const roles = await prisma.role.findMany({
+      include: {
+        permissions: true,
+        _count: { select: { users: true } },
+      },
+      orderBy: { name: 'asc' },
+    });
+    res.json({ success: true, data: roles });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── PUT /users/:id (admin only) ──────────────────────────────────────────────
+userRouter.put('/:id', authenticate, requireRole(UserRole.ADMIN, UserRole.SUPER_ADMIN), async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { isActive, role, name, department, semester } = req.body;
+    const updateData: Record<string, unknown> = {};
+    if (typeof isActive === 'boolean') updateData.isActive = isActive;
+    if (name) updateData.name = name;
+    if (department) updateData.department = department;
+    if (typeof semester === 'number') updateData.semester = semester;
+    if (role) {
+      const foundRole = await prisma.role.findUnique({ where: { name: role } });
+      if (foundRole) updateData.roleId = foundRole.id;
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: req.params.id },
+      data: updateData,
+      include: { role: true },
+      omit: { passwordHash: true },
+    });
+    res.json({ success: true, data: updated });
   } catch (err) {
     next(err);
   }

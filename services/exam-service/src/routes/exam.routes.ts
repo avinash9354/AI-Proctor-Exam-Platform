@@ -73,7 +73,9 @@ examRouter.post('/', authenticate, requireRole(UserRole.ADMIN, UserRole.SUPER_AD
         startTime: new Date(result.data.startTime),
         endTime: new Date(result.data.endTime),
         createdBy: req.user!.id,
-        policyConfig: result.data.policyConfig || {},
+        policyConfig: typeof result.data.policyConfig === 'string'
+          ? result.data.policyConfig
+          : JSON.stringify(result.data.policyConfig || {}),
       },
     });
 
@@ -88,7 +90,13 @@ examRouter.patch('/:id', authenticate, requireRole(UserRole.ADMIN, UserRole.SUPE
   try {
     const exam = await prisma.exam.update({
       where: { id: req.params.id },
-      data: { ...req.body, updatedAt: new Date() },
+      data: {
+        ...req.body,
+        policyConfig: req.body.policyConfig && typeof req.body.policyConfig !== 'string'
+          ? JSON.stringify(req.body.policyConfig)
+          : req.body.policyConfig,
+        updatedAt: new Date(),
+      },
     });
     res.json({ success: true, data: exam });
   } catch (err) {
@@ -117,11 +125,17 @@ examRouter.get('/:id/questions', authenticate, async (req: AuthRequest, res: Res
 
     // Strip correct answers for students
     const sanitized = isStudent
-      ? questions.map((q) => ({
+      ? questions.map((q) => {
+          const parsedPayload = typeof q.payload === 'string' ? JSON.parse(q.payload) : (q.payload || {});
+          return {
+            ...q,
+            payload: sanitizeQuestionForStudent(parsedPayload as Record<string, unknown>),
+          };
+        })
+      : questions.map((q) => ({
           ...q,
-          payload: sanitizeQuestionForStudent(q.payload as Record<string, unknown>),
-        }))
-      : questions;
+          payload: typeof q.payload === 'string' ? JSON.parse(q.payload) : (q.payload || {}),
+        }));
 
     res.json({ success: true, data: sanitized });
   } catch (err) {

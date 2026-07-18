@@ -13,12 +13,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@exam-platform/shared": ["../../packages/shared/src"],
-      "@exam-platform/database": ["../../packages/database/src"]
+      "@exam-platform/shared": ["packages/shared/src"],
+      "@exam-platform/database": ["packages/database/src"]
     }
   },
   "exclude": ["node_modules", "dist"]

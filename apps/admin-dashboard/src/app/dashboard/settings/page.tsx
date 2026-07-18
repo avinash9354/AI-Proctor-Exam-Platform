@@ -1,8 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Shield, Bell, Database, Globe, Key, Save, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminAuthStore } from '@/stores/adminAuthStore';
+import { useQuery } from '@tanstack/react-query';
+import { examClient } from '@/lib/apiClient';
 
 interface SettingSection {
   id: string;
@@ -50,11 +52,52 @@ export default function AdminSettingsPage() {
     alertThreshold: 'orange',
   });
 
+  // Fetch persisted settings from backend
+  const { data: dbSettings = [] } = useQuery({
+    queryKey: ['admin-system-settings'],
+    queryFn: () => examClient.get('/admin/settings').then((r) => r.data.data || []).catch(() => []),
+  });
+
+  useEffect(() => {
+    if (Array.isArray(dbSettings) && dbSettings.length > 0) {
+      const gen: any = { ...generalSettings };
+      const proc: any = { ...proctoringSettings };
+      const notif: any = { ...notificationSettings };
+
+      dbSettings.forEach((s: any) => {
+        let val = s.value;
+        try { val = JSON.parse(s.value); } catch {}
+        if (s.category === 'general' && keyInObj(gen, s.key)) gen[s.key] = val;
+        if (s.category === 'proctoring' && keyInObj(proc, s.key)) proc[s.key] = val;
+        if (s.category === 'notifications' && keyInObj(notif, s.key)) notif[s.key] = val;
+      });
+
+      setGeneralSettings(gen);
+      setProctoringSettings(proc);
+      setNotificationSettings(notif);
+    }
+  }, [dbSettings]);
+
+  const keyInObj = (obj: any, k: string) => Object.prototype.hasOwnProperty.call(obj, k);
+
   const handleSave = async () => {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 800)); // simulate save
-    toast.success('Settings saved successfully');
-    setSaving(false);
+    try {
+      const currentPayload =
+        activeSection === 'general' ? generalSettings :
+        activeSection === 'proctoring' ? proctoringSettings :
+        notificationSettings;
+
+      await examClient.put('/admin/settings', {
+        category: activeSection,
+        settings: currentPayload,
+      });
+      toast.success('Settings saved successfully');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || 'Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

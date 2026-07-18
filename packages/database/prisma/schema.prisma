@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -271,4 +272,17 @@ model AuditLog {
   session ExamSession? @relation(fields: [targetSessionId], references: [id])
 
   @@map("audit_logs")
+}
+
+// ─── System Settings ─────────────────────────────────────────────────────────
+
+model SystemSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  category  String
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
 }

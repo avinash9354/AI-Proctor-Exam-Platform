@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -26,7 +26,7 @@ const DEMO: Record<RoleMode, { email: string; password: string; label: string }>
   admin:   { email: 'admin@examplatform.com',   password: 'Admin@1234',   label: 'Admin'   },
 };
 
-export default function UnifiedLoginPage() {
+function UnifiedLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const setAuth = useAuthStore((s) => s.setAuth);
@@ -252,5 +252,13 @@ export default function UnifiedLoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function UnifiedLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-white font-mono">Loading...</div>}>
+      <UnifiedLoginContent />
+    </Suspense>
   );
 }

@@ -3,11 +3,21 @@
   "version": "1.0.0",
   "private": true,
   "main": "src/main.js",
+  "description": "Secure Lockdown Browser for AI Proctor Platform",
+  "author": "AI Proctor Team",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder --dir"
   },
-  "dependencies": {
-    "electron": "^31.0.0"
+  "build": {
+    "electronVersion": "31.7.7",
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "31.7.7",
+    "electron-builder": "26.15.3"
   }
 }

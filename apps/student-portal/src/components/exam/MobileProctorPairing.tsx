@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Smartphone, Copy, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
-import { formatPairingInfo, PairingData } from '@/lib/qrCode';
+import { formatPairingInfo, generatePairingCode, PairingData } from '@/lib/qrCode';
 import toast from 'react-hot-toast';
 
 interface MobileProctorPairingProps {
@@ -23,35 +23,23 @@ export function MobileProctorPairing({
   const [paired, setPaired] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Generate pairing info on mount
+  // Generate pairing info on mount (client-side — no API route needed)
   useEffect(() => {
-    const generatePairing = async () => {
-      try {
-        // Call backend to generate pairing code
-        const res = await fetch('/api/sessions/pairing', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, studentId }),
-        });
+    try {
+      const pairingCode = generatePairingCode();
+      const expiresAt = Date.now() + 5 * 60 * 1000;
+      const pairing: PairingData = { sessionId, studentId, pairingCode, expiresAt };
+      const info = formatPairingInfo(pairing);
 
-        if (!res.ok) throw new Error('Failed to generate pairing code');
-
-        const data = (await res.json()) as { data: PairingData };
-        const pairing = data.data;
-        const info = formatPairingInfo(pairing);
-
-        setPairingCode(info.code);
-        setQrUrl(info.qrUrl);
-        setExpiresIn(info.expiresIn);
-      } catch (err) {
-        console.error('Pairing error:', err);
-        toast.error('Failed to generate pairing code');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    generatePairing();
+      setPairingCode(info.code);
+      setQrUrl(info.qrUrl);
+      setExpiresIn(info.expiresIn);
+    } catch (err) {
+      console.error('Pairing error:', err);
+      toast.error('Failed to generate pairing code');
+    } finally {
+      setLoading(false);
+    }
   }, [sessionId, studentId]);
 
   // Poll for mobile pairing completion (from localStorage or backend)

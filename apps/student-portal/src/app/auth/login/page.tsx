@@ -49,6 +49,37 @@ function UnifiedLoginContent() {
   };
 
 
+  const handleDemoLogin = () => {
+    if (mode === 'admin') {
+      const demoUser = {
+        id: 'demo-admin-usr',
+        email: 'admin@demo.com',
+        name: 'Demo Teacher / Admin',
+        role: 'admin',
+      };
+      setAuth(demoUser, 'demo-jwt-token', 'demo-jwt-refresh');
+      toast.success('Entering Demo Mode as Admin/Teacher! 🎉');
+      const params = new URLSearchParams({
+        token: 'demo-jwt-token',
+        refresh: 'demo-jwt-refresh',
+        user: btoa(JSON.stringify(demoUser)),
+      });
+      const adminUrl = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || 'http://localhost:3001';
+      window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
+    } else {
+      const demoUser = {
+        id: 'demo-student-usr',
+        email: 'student@demo.com',
+        name: 'Demo Student',
+        role: 'student',
+        rollNumber: 'DEMO-2026',
+      };
+      setAuth(demoUser, 'demo-jwt-token', 'demo-jwt-refresh');
+      toast.success('Entering Demo Mode as Student! 🎉');
+      router.push('/dashboard');
+    }
+  };
+
   const onSubmit = async (data: LoginForm) => {
     try {
       const res = await apiClient.post('/auth/login', data);
@@ -67,8 +98,6 @@ function UnifiedLoginContent() {
       toast.success(`Welcome, ${user.name}! 🎉`);
 
       if (['admin', 'super_admin', 'teacher'].includes(user.role)) {
-        // Pass auth via URL params to admin dashboard callback page
-        // (localStorage is NOT shared between different ports)
         const params = new URLSearchParams({
           token: accessToken,
           refresh: refreshToken || '',
@@ -80,7 +109,14 @@ function UnifiedLoginContent() {
         router.push('/dashboard');
       }
     } catch (err: unknown) {
-      const rawError = (err as { response?: { data?: { error?: unknown } } })?.response?.data?.error;
+      const axiosErr = err as { response?: { data?: { error?: unknown } }; code?: string; message?: string };
+      const isNetworkError = !axiosErr.response || axiosErr.code === 'ERR_NETWORK' || axiosErr.message === 'Network Error';
+      if (isNetworkError) {
+        toast.error('Backend server offline. Auto-launching in Demo Mode! ⚡');
+        handleDemoLogin();
+        return;
+      }
+      const rawError = axiosErr?.response?.data?.error;
       const message = typeof rawError === 'string' ? rawError : (rawError ? JSON.stringify(rawError) : 'Login failed');
       toast.error(message);
     }
@@ -318,6 +354,15 @@ function UnifiedLoginContent() {
               ) : (
                 <>Sign In <ArrowRight className="w-4 h-4" /></>
               )}
+            </button>
+
+            {/* Instant Demo Mode Button (Works without backend) */}
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              className="w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-medium text-xs text-[#10b981] transition-all duration-300 hover:bg-[#10b981]/10 border border-[#10b981]/30"
+            >
+              ⚡ Instant Demo Login (No Backend Needed)
             </button>
           </form>
         </div>

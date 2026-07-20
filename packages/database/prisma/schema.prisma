@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:/Users/avinashpandey/Desktop/App/packages/database/prisma/dev.db"
+  url      = "file:/Users/avinash/Desktop/App 2/packages/database/prisma/dev.db"
 }
 
 // ─── RBAC ────────────────────────────────────────────────────────────────────

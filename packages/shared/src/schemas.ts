@@ -22,6 +22,17 @@ export const RefreshTokenSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
+export const FirebaseLoginSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(100),
+  firebaseUid: z.string().min(1),
+  photoUrl: z.string().optional(),
+  role: z.nativeEnum(UserRole).default(UserRole.STUDENT),
+  rollNumber: z.string().optional(),
+  department: z.string().optional(),
+  semester: z.number().int().min(1).max(12).optional(),
+});
+
 // ─── Exam Schemas ─────────────────────────────────────────────────────────────
 
 export const PolicyConfigSchema = z.object({

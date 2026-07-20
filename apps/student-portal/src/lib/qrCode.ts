@@ -13,7 +13,7 @@ export interface PairingData {
  * Generate a simple QR code data URL using qrserver API
  * Format: data:image/png;base64,...
  */
-export function generateQRCodeDataUrl(pairingData: PairingData): string {
+function generateQRCodeDataUrl(pairingData: PairingData): string {
   // Direct browser URL so scanning with phone camera immediately suggests opening the link
   const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:3000';
   const targetUrl = `${origin}/proctor?sessionId=${pairingData.sessionId}&code=${pairingData.pairingCode}&studentId=${pairingData.studentId}`;

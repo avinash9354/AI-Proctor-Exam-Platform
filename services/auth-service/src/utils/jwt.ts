@@ -11,11 +11,11 @@ const ACCESS_EXPIRES = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
 const REFRESH_EXPIRES = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 const REFRESH_EXPIRES_DAYS = 7;
 
-export function signAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
+function signAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
   return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_EXPIRES } as jwt.SignOptions);
 }
 
-export function signRefreshToken(userId: string): string {
+function signRefreshToken(userId: string): string {
   return jwt.sign({ sub: userId, type: 'refresh' }, REFRESH_SECRET, {
     expiresIn: REFRESH_EXPIRES,
   } as jwt.SignOptions);

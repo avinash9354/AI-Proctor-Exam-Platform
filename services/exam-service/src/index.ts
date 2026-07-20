@@ -10,6 +10,8 @@ import { questionRouter } from './routes/question.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { prisma } from './lib/prisma';
+import { connectRedis } from './lib/redis';
+import { checkAndAutoSubmitExpiredSessions } from './modules/exam/examStateMachine';
 
 const app = express();
 const PORT = process.env.PORT || 4002;
@@ -36,6 +38,12 @@ app.use(errorHandler);
 async function start() {
   await prisma.$connect();
   logger.info('✅ Database connected');
+  await connectRedis();
+  setInterval(() => {
+    checkAndAutoSubmitExpiredSessions().catch((err) =>
+      logger.error('AutoSubmit cron error:', err)
+    );
+  }, 60_000);
   app.listen(PORT, () => logger.info(`🚀 Exam service running on port ${PORT}`));
 }
 

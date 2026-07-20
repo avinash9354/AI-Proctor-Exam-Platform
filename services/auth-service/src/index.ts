@@ -7,6 +7,7 @@ import { userRouter } from './routes/user.routes';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import { prisma } from './lib/prisma';
+import { connectRedis } from './lib/redis';
 
 const app = express();
 const PORT = process.env.PORT || 4001;
@@ -36,6 +37,7 @@ async function start() {
   try {
     await prisma.$connect();
     logger.info('✅ Database connected');
+    await connectRedis();
     app.listen(PORT, () => {
       logger.info(`🚀 Auth service running on port ${PORT}`);
     });

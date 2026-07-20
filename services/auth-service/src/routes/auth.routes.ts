@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import rateLimit from 'express-rate-limit';
-import { SignupSchema, LoginSchema, RefreshTokenSchema } from '@exam-platform/shared';
+import { SignupSchema, LoginSchema, RefreshTokenSchema, FirebaseLoginSchema } from '@exam-platform/shared';
 import { prisma } from '../lib/prisma';
 import { issueTokenPair, verifyRefreshToken, revokeRefreshToken, blacklistAccessToken } from '../utils/jwt';
 import { authenticate, AuthRequest } from '../middleware/rbac';
@@ -86,6 +86,83 @@ authRouter.post('/signup', signupLimiter, async (req: Request, res: Response, ne
       success: true,
       data: {
         user: { id: user.id, name: user.name, email: user.email, role: user.role.name },
+        ...tokens,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ─── POST /auth/firebase-login ────────────────────────────────────────────────
+authRouter.post('/firebase-login', loginLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = FirebaseLoginSchema.safeParse(req.body);
+    if (!result.success) {
+      res.status(400).json({ success: false, error: result.error.flatten() });
+      return;
+    }
+
+    const { email, name, firebaseUid, photoUrl, role, rollNumber, department, semester } = result.data;
+
+    let user = await prisma.user.findUnique({
+      where: { email },
+      include: { role: true },
+    });
+
+    if (user) {
+      if (!user.isActive) {
+        res.status(403).json({ success: false, error: 'Account is disabled. Please contact support.' });
+        return;
+      }
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          lastLoginAt: new Date(),
+          photoUrl: photoUrl || user.photoUrl,
+        },
+        include: { role: true },
+      });
+    } else {
+      const dbRole = await prisma.role.findFirst({ where: { name: role } });
+      if (!dbRole) {
+        res.status(400).json({ success: false, error: 'Invalid role provided for account creation' });
+        return;
+      }
+      const passwordHash = await bcrypt.hash(`FIREBASE_AUTH_${firebaseUid}`, 12);
+      user = await prisma.user.create({
+        data: {
+          name,
+          email,
+          passwordHash,
+          roleId: dbRole.id,
+          photoUrl,
+          rollNumber,
+          department,
+          semester,
+          isActive: true,
+          lastLoginAt: new Date(),
+        },
+        include: { role: true },
+      });
+    }
+
+    const tokens = await issueTokenPair(user);
+    logger.info(`User authenticated with Firebase: ${email} (${user.role.name})`);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role.name,
+          rollNumber: user.rollNumber,
+          department: user.department,
+          semester: user.semester,
+          photoUrl: user.photoUrl,
+        },
         ...tokens,
       },
     });

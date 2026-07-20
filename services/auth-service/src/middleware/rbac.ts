@@ -60,7 +60,7 @@ export function requireRole(...roles: UserRole[]) {
 }
 
 // ─── Permission Check (resource + action) ────────────────────────────────────
-export function requirePermission(resource: string, action: string) {
+function requirePermission(resource: string, action: string) {
   return async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
     if (!req.user) {
       res.status(401).json({ success: false, error: 'Unauthenticated' });

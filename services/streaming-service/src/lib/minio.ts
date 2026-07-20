@@ -1,7 +1,7 @@
 import * as Minio from 'minio';
 import { logger } from '../utils/logger';
 
-export const minioClient = new Minio.Client({
+const minioClient = new Minio.Client({
   endPoint: process.env.MINIO_ENDPOINT || 'localhost',
   port: parseInt(process.env.MINIO_PORT || '9000', 10),
   useSSL: process.env.MINIO_USE_SSL === 'true',
@@ -28,7 +28,7 @@ export async function ensureBuckets(): Promise<void> {
   }
 }
 
-export async function uploadChunk(
+async function uploadChunk(
   bucket: string,
   objectName: string,
   data: Buffer,
@@ -45,7 +45,7 @@ export async function uploadChunk(
   return `${bucket}/${objectName}`;
 }
 
-export async function getSignedUrl(bucket: string, objectName: string, expirySeconds = 3600): Promise<string> {
+async function getSignedUrl(bucket: string, objectName: string, expirySeconds = 3600): Promise<string> {
   try {
     return await minioClient.presignedGetObject(bucket, objectName, expirySeconds);
   } catch {

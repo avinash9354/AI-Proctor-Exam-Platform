@@ -5,7 +5,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
 import helmet from 'helmet';
 import { roomManager } from './sfu/roomManager';
-import { minioClient, ensureBuckets } from './lib/minio';
+import { ensureBuckets } from './lib/minio';
 import { logger } from './utils/logger';
 
 const app = express();

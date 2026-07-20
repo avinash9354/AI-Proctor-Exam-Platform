@@ -8,7 +8,7 @@ declare global {
 export const prisma =
   global.__prisma ??
   new PrismaClient({
-    datasourceUrl: 'file:/Users/avinashpandey/Desktop/App/packages/database/prisma/dev.db',
+    datasourceUrl: 'file:/Users/avinash/Desktop/App 2/packages/database/prisma/dev.db',
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 

@@ -115,11 +115,13 @@ authRouter.post('/firebase-login', loginLimiter, async (req: Request, res: Respo
         res.status(403).json({ success: false, error: 'Account is disabled. Please contact support.' });
         return;
       }
+      const dbRole = role ? await prisma.role.findFirst({ where: { name: role } }) : null;
       user = await prisma.user.update({
         where: { id: user.id },
         data: {
           lastLoginAt: new Date(),
           photoUrl: photoUrl || user.photoUrl,
+          ...(dbRole && user.role.name !== role ? { roleId: dbRole.id } : {}),
         },
         include: { role: true },
       });

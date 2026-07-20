@@ -14,8 +14,9 @@ export default function AdminQuestionBankPage() {
   const queryClient = useQueryClient();
 
   const [newQuestion, setNewQuestion] = useState({
-    type: 'multiple_choice',
+    type: 'mcq',
     points: 10,
+    marks: 10,
     difficulty: 'medium',
     payload: {
       prompt: '',
@@ -30,24 +31,75 @@ export default function AdminQuestionBankPage() {
   });
 
   const questions = (Array.isArray(data) ? data : []).filter((q: any) => {
-    const prompt = q.payload?.prompt || q.payload?.question || '';
+    const prompt = q.payload?.text || q.payload?.prompt || q.payload?.question || '';
     const matchesSearch = !search || prompt.toLowerCase().includes(search.toLowerCase());
-    const matchesType = typeFilter === 'ALL' || q.type === typeFilter;
+    const matchesType =
+      typeFilter === 'ALL' ||
+      q.type === typeFilter ||
+      (typeFilter === 'mcq' && q.type === 'multiple_choice') ||
+      (typeFilter === 'subjective' && q.type === 'essay');
     const matchesDiff = difficultyFilter === 'ALL' || q.difficulty === difficultyFilter;
     return matchesSearch && matchesType && matchesDiff;
   });
 
   const createMutation = useMutation({
     mutationFn: async (questionData: typeof newQuestion) => {
-      const res = await examClient.post('/questions', questionData);
+      const qType =
+        questionData.type === 'multiple_choice'
+          ? 'mcq'
+          : questionData.type === 'essay'
+          ? 'subjective'
+          : questionData.type;
+
+      const promptText = questionData.payload.prompt || questionData.payload.text || 'Untitled Question';
+
+      let formattedPayload: any = {
+        type: qType,
+        text: promptText,
+      };
+
+      if (qType === 'mcq') {
+        const rawOptions = Array.isArray(questionData.payload.options)
+          ? questionData.payload.options
+          : ['Option A', 'Option B', 'Option C', 'Option D'];
+        const correctIdx = questionData.payload.correctOption ?? 0;
+        formattedPayload.options = rawOptions.map((opt: any, idx: number) => {
+          if (typeof opt === 'string') {
+            return { id: `opt-${idx}`, text: opt, isCorrect: idx === correctIdx };
+          }
+          return {
+            id: opt.id || `opt-${idx}`,
+            text: opt.text || '',
+            isCorrect: Boolean(opt.isCorrect || idx === correctIdx),
+          };
+        });
+      } else if (qType === 'coding') {
+        formattedPayload.testCases = [
+          { input: 'sample input', expectedOutput: 'sample output', isHidden: false },
+        ];
+        formattedPayload.timeLimit = 2000;
+        formattedPayload.memoryLimit = 256;
+        formattedPayload.allowedLanguages = ['javascript', 'python', 'java', 'cpp'];
+      }
+
+      const payloadToSend = {
+        examId: null,
+        type: qType,
+        marks: Number(questionData.marks ?? questionData.points ?? 10),
+        negativeMarks: 0,
+        payload: formattedPayload,
+      };
+
+      const res = await examClient.post('/questions', payloadToSend);
       return res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-questions'] });
       setIsCreateModalOpen(false);
       setNewQuestion({
-        type: 'multiple_choice',
+        type: 'mcq',
         points: 10,
+        marks: 10,
         difficulty: 'medium',
         payload: { prompt: '', options: ['Option A', 'Option B', 'Option C', 'Option D'], correctOption: 0 },
       });
@@ -71,6 +123,7 @@ export default function AdminQuestionBankPage() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'coding': return <Code className="w-4 h-4 text-purple-400" />;
+      case 'subjective':
       case 'essay': return <FileText className="w-4 h-4 text-amber-400" />;
       default: return <CheckSquare className="w-4 h-4 text-[#4c7ef3]" />;
     }
@@ -103,8 +156,8 @@ export default function AdminQuestionBankPage() {
             id="type-filter"
           >
             <option value="ALL">All Types</option>
-            <option value="multiple_choice">Multiple Choice</option>
-            <option value="essay">Essay / Free Text</option>
+            <option value="mcq">Multiple Choice</option>
+            <option value="subjective">Essay / Free Text</option>
             <option value="coding">Coding Challenge</option>
           </select>
           <select
@@ -144,7 +197,7 @@ export default function AdminQuestionBankPage() {
             <span className="text-xs bg-blue-400/10 text-blue-400 px-2.5 py-1 rounded-full font-semibold">MCQ</span>
           </div>
           <div className="text-2xl font-bold text-[#e8eaf6]">
-            {(data || []).filter((q: any) => q.type === 'multiple_choice').length}
+            {(data || []).filter((q: any) => q.type === 'mcq' || q.type === 'multiple_choice').length}
           </div>
           <div className="text-xs text-[#8892b0] mt-0.5">Multiple Choice Items</div>
         </div>
@@ -164,7 +217,7 @@ export default function AdminQuestionBankPage() {
             <span className="text-xs bg-amber-400/10 text-amber-400 px-2.5 py-1 rounded-full font-semibold">Essay</span>
           </div>
           <div className="text-2xl font-bold text-[#e8eaf6]">
-            {(data || []).filter((q: any) => q.type === 'essay').length}
+            {(data || []).filter((q: any) => q.type === 'subjective' || q.type === 'essay').length}
           </div>
           <div className="text-xs text-[#8892b0] mt-0.5">Long-form Written Responses</div>
         </div>
@@ -191,7 +244,8 @@ export default function AdminQuestionBankPage() {
       ) : (
         <div className="space-y-3">
           {questions.map((question: any) => {
-            const prompt = question.payload?.prompt || question.payload?.question || 'Untitled Question';
+            const prompt = question.payload?.text || question.payload?.prompt || question.payload?.question || 'Untitled Question';
+            const marksVal = question.marks ?? question.points ?? 0;
             return (
               <div key={question.id} className="card p-5 border border-[#1e2d50] rounded-2xl bg-[#0f1629] hover:border-[#4c7ef3]/40 transition-colors flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
@@ -201,29 +255,33 @@ export default function AdminQuestionBankPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs uppercase tracking-wider font-bold text-[#4c7ef3] bg-[#4c7ef3]/10 px-2 py-0.5 rounded">
-                        {question.type.replace('_', ' ')}
+                        {(question.type === 'mcq' || question.type === 'multiple_choice') ? 'MCQ' : question.type.replace('_', ' ')}
                       </span>
                       <span className={`text-xs capitalize font-semibold px-2 py-0.5 rounded ${
                         question.difficulty === 'hard' ? 'bg-red-900/30 text-red-400' :
                         question.difficulty === 'medium' ? 'bg-amber-900/30 text-amber-400' :
                         'bg-emerald-900/30 text-emerald-400'
                       }`}>
-                        {question.difficulty}
+                        {question.difficulty || 'medium'}
                       </span>
                       <span className="text-xs font-semibold text-[#8892b0] bg-[#1a2540] px-2 py-0.5 rounded">
-                        {question.points} {question.points === 1 ? 'pt' : 'pts'}
+                        {marksVal} {marksVal === 1 ? 'pt' : 'pts'}
                       </span>
                     </div>
                     <h3 className="text-sm font-semibold text-[#e8eaf6] break-words line-clamp-2">{prompt}</h3>
-                    {question.type === 'multiple_choice' && Array.isArray(question.payload?.options) && (
+                    {(question.type === 'mcq' || question.type === 'multiple_choice') && Array.isArray(question.payload?.options) && (
                       <div className="mt-2.5 grid grid-cols-2 gap-2">
-                        {question.payload.options.map((opt: string, i: number) => (
-                          <div key={i} className={`text-xs px-2.5 py-1.5 rounded-lg border ${
-                            i === question.payload.correctOption ? 'bg-emerald-900/20 border-emerald-500/40 text-emerald-300 font-medium' : 'bg-[#1a2540]/60 border-[#1e2d50] text-[#8892b0]'
-                          }`}>
-                            {String.fromCharCode(65 + i)}. {opt}
-                          </div>
-                        ))}
+                        {question.payload.options.map((opt: any, i: number) => {
+                          const optText = typeof opt === 'string' ? opt : opt?.text;
+                          const isCorrect = typeof opt === 'string' ? i === question.payload?.correctOption : opt?.isCorrect;
+                          return (
+                            <div key={i} className={`text-xs px-2.5 py-1.5 rounded-lg border ${
+                              isCorrect ? 'bg-emerald-900/20 border-emerald-500/40 text-emerald-300 font-medium' : 'bg-[#1a2540]/60 border-[#1e2d50] text-[#8892b0]'
+                            }`}>
+                              {String.fromCharCode(65 + i)}. {optText}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -271,13 +329,13 @@ export default function AdminQuestionBankPage() {
                       setNewQuestion({
                         ...newQuestion,
                         type: t,
-                        payload: t === 'multiple_choice' ? { prompt: newQuestion.payload.prompt, options: ['Option A', 'Option B', 'Option C', 'Option D'], correctOption: 0 } : { prompt: newQuestion.payload.prompt },
+                        payload: (t === 'mcq' || t === 'multiple_choice') ? { prompt: newQuestion.payload.prompt, options: ['Option A', 'Option B', 'Option C', 'Option D'], correctOption: 0 } : { prompt: newQuestion.payload.prompt },
                       });
                     }}
                     className="w-full px-3 py-2 rounded-xl bg-[#1a2540] border border-[#1e2d50] text-sm text-[#e8eaf6] outline-none"
                   >
-                    <option value="multiple_choice">Multiple Choice</option>
-                    <option value="essay">Essay / Free Text</option>
+                    <option value="mcq">Multiple Choice</option>
+                    <option value="subjective">Essay / Free Text</option>
                     <option value="coding">Coding Challenge</option>
                   </select>
                 </div>
@@ -300,8 +358,11 @@ export default function AdminQuestionBankPage() {
                     min="1"
                     max="100"
                     required
-                    value={newQuestion.points}
-                    onChange={(e) => setNewQuestion({ ...newQuestion, points: parseInt(e.target.value) || 1 })}
+                    value={newQuestion.marks ?? newQuestion.points ?? 10}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 1;
+                      setNewQuestion({ ...newQuestion, points: val, marks: val });
+                    }}
                     className="w-full px-3 py-2 rounded-xl bg-[#1a2540] border border-[#1e2d50] text-sm text-[#e8eaf6] outline-none"
                   />
                 </div>
@@ -319,33 +380,36 @@ export default function AdminQuestionBankPage() {
                 />
               </div>
 
-              {newQuestion.type === 'multiple_choice' && (
+              {(newQuestion.type === 'mcq' || newQuestion.type === 'multiple_choice') && (
                 <div className="space-y-3 bg-[#1a2540]/40 p-4 rounded-xl border border-[#1e2d50]">
                   <label className="text-xs font-semibold text-[#e8eaf6] block">Answer Options & Correct Key</label>
-                  {newQuestion.payload.options.map((opt: string, i: number) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="correctOpt"
-                        checked={newQuestion.payload.correctOption === i}
-                        onChange={() => setNewQuestion({ ...newQuestion, payload: { ...newQuestion.payload, correctOption: i } })}
-                        className="text-[#4c7ef3] focus:ring-0 cursor-pointer"
-                        title={`Select option ${String.fromCharCode(65 + i)} as correct`}
-                      />
-                      <span className="text-xs font-bold text-[#8892b0] w-5">{String.fromCharCode(65 + i)}.</span>
-                      <input
-                        type="text"
-                        required
-                        value={opt}
-                        onChange={(e) => {
-                          const nextOpts = [...newQuestion.payload.options];
-                          nextOpts[i] = e.target.value;
-                          setNewQuestion({ ...newQuestion, payload: { ...newQuestion.payload, options: nextOpts } });
-                        }}
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-[#0f1629] border border-[#1e2d50] text-xs text-[#e8eaf6] outline-none"
-                      />
-                    </div>
-                  ))}
+                  {(newQuestion.payload.options || []).map((opt: any, i: number) => {
+                    const optText = typeof opt === 'string' ? opt : opt?.text || '';
+                    return (
+                      <div key={i} className="flex items-center gap-2">
+                        <input
+                          type="radio"
+                          name="correctOpt"
+                          checked={newQuestion.payload.correctOption === i}
+                          onChange={() => setNewQuestion({ ...newQuestion, payload: { ...newQuestion.payload, correctOption: i } })}
+                          className="text-[#4c7ef3] focus:ring-0 cursor-pointer"
+                          title={`Select option ${String.fromCharCode(65 + i)} as correct`}
+                        />
+                        <span className="text-xs font-bold text-[#8892b0] w-5">{String.fromCharCode(65 + i)}.</span>
+                        <input
+                          type="text"
+                          required
+                          value={optText}
+                          onChange={(e) => {
+                            const nextOpts = [...(newQuestion.payload.options || [])];
+                            nextOpts[i] = typeof nextOpts[i] === 'string' ? e.target.value : { ...nextOpts[i], text: e.target.value };
+                            setNewQuestion({ ...newQuestion, payload: { ...newQuestion.payload, options: nextOpts } });
+                          }}
+                          className="flex-1 px-3 py-1.5 rounded-lg bg-[#0f1629] border border-[#1e2d50] text-xs text-[#e8eaf6] outline-none"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 

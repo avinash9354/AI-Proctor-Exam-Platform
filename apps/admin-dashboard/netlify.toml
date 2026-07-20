@@ -1,0 +1,21 @@
+# Netlify configuration for Admin Dashboard (@exam-platform/admin-dashboard)
+# When deploying on Netlify:
+# 1. Set Base directory in Netlify UI to: apps/admin-dashboard
+# 2. Build command will automatically run: npm run build
+# 3. Publish directory is automatically: .next
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Use the official Netlify Next.js Runtime Plugin for full SSR, API Routes, and Middleware support
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Optional: Security & Performance headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

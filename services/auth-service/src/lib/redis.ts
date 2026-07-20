@@ -13,5 +13,9 @@ redis.on('connect', () => logger.info('✅ Redis connected'));
 redis.on('error', (err) => logger.error('Redis error:', err));
 
 export async function connectRedis() {
-  await redis.connect();
+  try {
+    await redis.connect();
+  } catch {
+    logger.warn('Redis unavailable, running in fallback mode');
+  }
 }

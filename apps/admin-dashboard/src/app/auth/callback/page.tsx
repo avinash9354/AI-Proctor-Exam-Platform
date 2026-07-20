@@ -18,7 +18,8 @@ function CallbackHandler() {
 
       if (!token || !userEncoded) {
         setError('Invalid login session. Please login again.');
-        setTimeout(() => { window.location.href = 'http://localhost:3000/auth/login?role=admin'; }, 2000);
+        const studentPortalUrl = process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'http://localhost:3000';
+        setTimeout(() => { window.location.href = `${studentPortalUrl}/auth/login?role=admin`; }, 2000);
         return;
       }
 
@@ -27,7 +28,8 @@ function CallbackHandler() {
       // Verify admin/teacher role
       if (!['admin', 'super_admin', 'teacher'].includes(user.role)) {
         setError('Access denied. Admin or Teacher account required.');
-        setTimeout(() => { window.location.href = 'http://localhost:3000/auth/login?role=admin'; }, 2000);
+        const studentPortalUrl = process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'http://localhost:3000';
+        setTimeout(() => { window.location.href = `${studentPortalUrl}/auth/login?role=admin`; }, 2000);
         return;
       }
 
@@ -38,7 +40,8 @@ function CallbackHandler() {
       router.replace('/dashboard');
     } catch {
       setError('Login failed. Please try again.');
-      setTimeout(() => { window.location.href = 'http://localhost:3000/auth/login?role=admin'; }, 2000);
+      const studentPortalUrl = process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'http://localhost:3000';
+      setTimeout(() => { window.location.href = `${studentPortalUrl}/auth/login?role=admin`; }, 2000);
     }
   }, [searchParams, setAuth, router]);
 

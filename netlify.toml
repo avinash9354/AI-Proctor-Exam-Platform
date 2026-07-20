@@ -1,0 +1,20 @@
+# Monorepo Root Netlify Configuration
+# Note: Since this monorepo has multiple frontend applications (Student Portal & Admin Dashboard),
+# we recommend connecting two separate sites on Netlify to this same Git repository:
+#
+# 1. Site 1 (Student Portal):
+#    Base directory: apps/student-portal
+#    Build command: npm run build
+#    Publish directory: apps/student-portal/.next
+#
+# 2. Site 2 (Admin Dashboard):
+#    Base directory: apps/admin-dashboard
+#    Build command: npm run build
+#    Publish directory: apps/admin-dashboard/.next
+
+[build]
+  # Default root fallback build command if base directory is not set
+  command = "npm run build"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

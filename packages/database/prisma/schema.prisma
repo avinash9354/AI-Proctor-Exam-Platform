@@ -115,7 +115,7 @@ model Enrollment {
 
 model Question {
   id          String   @id @default(uuid())
-  examId      String
+  examId      String?
   type        String   // mcq | msq | subjective | coding | typing
   payload     String
   marks       Int
@@ -125,7 +125,7 @@ model Question {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  exam        Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
   submissions Submission[]
 
   @@map("questions")

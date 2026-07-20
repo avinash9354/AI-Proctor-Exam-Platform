@@ -117,7 +117,7 @@ export const QuestionPayloadSchema = z.discriminatedUnion('type', [
 ]);
 
 export const CreateQuestionSchema = z.object({
-  examId: z.string().uuid(),
+  examId: z.string().uuid().optional().nullable(),
   type: z.nativeEnum(QuestionType),
   payload: QuestionPayloadSchema,
   marks: z.number().int().min(0),

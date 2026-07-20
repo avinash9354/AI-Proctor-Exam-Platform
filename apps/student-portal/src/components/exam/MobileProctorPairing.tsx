@@ -78,15 +78,7 @@ export function MobileProctorPairing({
     window.location.reload();
   };
 
-  const handleDemoConnect = () => {
-    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:3000';
-    const targetUrl = `${origin}/proctor?sessionId=${sessionId}&code=${pairingCode}&studentId=${studentId}`;
-    window.open(targetUrl, '_blank', 'width=450,height=800');
-    localStorage.setItem(`mobile-paired-${sessionId}`, 'true');
-    setPaired(true);
-    toast.success('📱 External Mobile Camera Connected & Streaming!');
-    setTimeout(() => onPaired(), 1500);
-  };
+
 
   if (loading) {
     return (
@@ -127,17 +119,7 @@ export function MobileProctorPairing({
             </div>
           )}
 
-          {/* Quick Demo Connect Button for instant testing */}
-          <div className="p-4 rounded-xl bg-gradient-to-r from-[#4c7ef3]/20 to-[#7c3aed]/20 border border-[#4c7ef3]/40 text-center space-y-2">
-            <p className="text-xs font-semibold text-[#e8eaf6]">⚡ Demo & Quick Testing Mode</p>
-            <p className="text-[11px] text-[#8892b0]">Testing right now on laptop? Launch external secondary camera in popup window:</p>
-            <button
-              onClick={handleDemoConnect}
-              className="btn-primary w-full text-xs py-2.5 gap-2 bg-gradient-to-r from-[#4c7ef3] to-[#7c3aed] hover:from-[#3b6ae0] hover:to-[#6d28d9] shadow-lg shadow-[#4c7ef3]/20"
-            >
-              <Smartphone className="w-4 h-4" /> Open External Mobile Proctor Camera & Connect
-            </button>
-          </div>
+
 
           {/* Manual Pairing Code */}
           <div className="space-y-2">

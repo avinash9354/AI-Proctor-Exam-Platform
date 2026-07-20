@@ -7,7 +7,8 @@ export default function AdminLoginRedirect() {
   const router = useRouter();
   useEffect(() => {
     // Redirect to unified login on student portal with admin tab pre-selected
-    window.location.replace('http://localhost:3000/auth/login?role=admin');
+    const studentPortalUrl = process.env.NEXT_PUBLIC_STUDENT_PORTAL_URL || 'http://localhost:3000';
+    window.location.replace(`${studentPortalUrl}/auth/login?role=admin`);
   }, []);
 
   return (

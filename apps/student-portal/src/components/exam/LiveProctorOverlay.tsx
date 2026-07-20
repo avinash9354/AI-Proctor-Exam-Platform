@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Shield, Camera, Mic, Monitor, Smartphone, AlertTriangle, Video, Eye, Radio, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { examClient } from '@/lib/apiClient';
+import { io } from 'socket.io-client';
 
 interface LiveProctorOverlayProps {
   sessionId: string;
@@ -13,7 +14,6 @@ export function LiveProctorOverlay({ sessionId, onViolation }: LiveProctorOverla
   const [minimized, setMinimized] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
   const [audioLevel, setAudioLevel] = useState(20);
-  const [showSimulate, setShowSimulate] = useState(false);
   const [mobilePaired, setMobilePaired] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -22,7 +22,23 @@ export function LiveProctorOverlay({ sessionId, onViolation }: LiveProctorOverla
   useEffect(() => {
     // Check if mobile camera was paired
     const isPaired = localStorage.getItem(`mobile-paired-${sessionId}`) === 'true';
-    setMobilePaired(isPaired || true); // Default true in demo mode for full feel
+    setMobilePaired(isPaired);
+
+    // Connect WebSocket signaling and notifications
+    const wsUrl = process.env.NEXT_PUBLIC_NOTIFICATION_WS_URL || 'http://localhost:4004';
+    const socket = io(wsUrl, { transports: ['websocket'] });
+    socket.emit('join:session', sessionId);
+
+    socket.on('student:notification', (data: { type: string; message: string }) => {
+      toast(data.message, { icon: '🔔', duration: 4000 });
+    });
+
+    socket.on('session:update', (event: { type: string; payload: any }) => {
+      if (event.type === 'ai_alert') {
+        toast.error(`⚠️ AI Proctor Alert: ${event.payload.eventType} detected!`);
+        if (onViolation) onViolation(event.payload.eventType);
+      }
+    });
 
     const startWebcam = async () => {
       try {
@@ -49,6 +65,7 @@ export function LiveProctorOverlay({ sessionId, onViolation }: LiveProctorOverla
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((t) => t.stop());
       }
+      socket.disconnect();
     };
   }, [sessionId]);
 
@@ -71,45 +88,6 @@ export function LiveProctorOverlay({ sessionId, onViolation }: LiveProctorOverla
 
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
-      {/* Simulation Controls Panel (Expandable for Demo) */}
-      {showSimulate && (
-        <div className="mb-2 w-72 bg-[#1a2540]/95 backdrop-blur-md border-2 border-amber-500/50 rounded-2xl p-3 shadow-2xl animate-fadeIn text-xs space-y-2">
-          <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
-            <span className="font-bold text-amber-400 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 fill-amber-400" /> Demo: Trigger AI Violations
-            </span>
-            <span className="text-[10px] text-[#8892b0]">Sends real events</span>
-          </div>
-          <p className="text-[10px] text-[#8892b0]">Click any button to trigger live alert in student HUD & Admin Monitoring panel:</p>
-          <div className="grid grid-cols-2 gap-1.5">
-            <button
-              onClick={() => simulateAiEvent('MULTIPLE_FACES', 'Multiple Faces')}
-              className="p-2 bg-red-900/40 hover:bg-red-800/60 border border-red-700/50 text-red-300 rounded-lg text-left transition-all"
-            >
-              👥 Multiple Faces
-            </button>
-            <button
-              onClick={() => simulateAiEvent('PHONE_DETECTED', 'Phone Detected')}
-              className="p-2 bg-orange-900/40 hover:bg-orange-800/60 border border-orange-700/50 text-orange-300 rounded-lg text-left transition-all"
-            >
-              📱 Phone Detected
-            </button>
-            <button
-              onClick={() => simulateAiEvent('FACE_NOT_DETECTED', 'No Face Found')}
-              className="p-2 bg-amber-900/40 hover:bg-amber-800/60 border border-amber-700/50 text-amber-300 rounded-lg text-left transition-all"
-            >
-              🚫 Face Looking Away
-            </button>
-            <button
-              onClick={() => simulateAiEvent('AUDIO_ANOMALY', 'Background Whisper')}
-              className="p-2 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-700/50 text-blue-300 rounded-lg text-left transition-all"
-            >
-              🎤 Audio Whisper
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main HUD Window */}
       <div className="w-72 bg-[#0f1629]/95 backdrop-blur-xl border-2 border-[#4c7ef3]/50 rounded-2xl overflow-hidden shadow-2xl transition-all">
         {/* Top Bar */}
@@ -123,13 +101,6 @@ export function LiveProctorOverlay({ sessionId, onViolation }: LiveProctorOverla
           </div>
 
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => setShowSimulate(!showSimulate)}
-              className={`p-1 rounded-md text-[10px] font-bold px-1.5 transition-all flex items-center gap-1 ${showSimulate ? 'bg-amber-500 text-black' : 'bg-amber-900/40 text-amber-400 border border-amber-700/40'}`}
-              title="Demo Simulator"
-            >
-              <Zap className="w-3 h-3" /> DEMO
-            </button>
             <button
               onClick={() => setMinimized(!minimized)}
               className="p-1 hover:bg-[#1e2d50] rounded text-[#8892b0]"

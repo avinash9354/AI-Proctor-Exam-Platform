@@ -54,7 +54,7 @@ reportRouter.get('/session/:sessionId/pdf', async (req: Request, res: Response) 
     doc.moveDown(0.5);
 
     if (session.violations.length > 0) {
-      session.violations.forEach((v, idx) => {
+      session.violations.forEach((v: any, idx: number) => {
         doc.text(`[${idx + 1}] Type: ${v.type} | Status: ${v.status} | Confidence: ${(v.confidence * 100).toFixed(0)}%`);
         if (v.reviewNotes) doc.text(`    Proctor Notes: ${v.reviewNotes}`);
       });

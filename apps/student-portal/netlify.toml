@@ -5,8 +5,8 @@
 # 3. Publish directory is automatically: .next
 
 [build]
-  command = "npm run build"
-  publish = ".next"
+  command = "npx turbo run build --filter=@exam-platform/student-portal..."
+  publish = "apps/student-portal/.next"
 
 # Use the official Netlify Next.js Runtime Plugin for full SSR, API Routes, and Middleware support
 [[plugins]]

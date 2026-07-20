@@ -65,7 +65,11 @@ function UnifiedLoginContent() {
         user: btoa(JSON.stringify(demoUser)),
       });
       const adminUrl = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || 'http://localhost:3001';
-      window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
+      if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && adminUrl.includes('localhost')) {
+        toast.error('Note: Admin Dashboard URL not set in Netlify Environment Variables. Please set NEXT_PUBLIC_ADMIN_DASHBOARD_URL.');
+      } else {
+        window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
+      }
     } else {
       const demoUser = {
         id: 'demo-student-usr',
@@ -104,7 +108,11 @@ function UnifiedLoginContent() {
           user: btoa(JSON.stringify(user)),
         });
         const adminUrl = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || 'http://localhost:3001';
-        window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
+        if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && adminUrl.includes('localhost')) {
+          toast.error('Note: Admin Dashboard URL not set in Netlify Environment Variables. Please set NEXT_PUBLIC_ADMIN_DASHBOARD_URL.');
+        } else {
+          window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
+        }
       } else {
         router.push('/dashboard');
       }

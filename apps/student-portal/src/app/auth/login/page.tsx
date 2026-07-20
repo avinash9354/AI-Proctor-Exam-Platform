@@ -203,10 +203,10 @@ function UnifiedLoginContent() {
       <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
 
       {/* Main Split Card Container */}
-      <div className="w-full max-w-[1040px] grid grid-cols-1 lg:grid-cols-12 rounded-[2.25rem] overflow-hidden shadow-2xl shadow-orange-950/10 border border-gray-200/80 bg-white relative z-10 animate-fadeIn">
+      <div className="w-full max-w-[1040px] grid grid-cols-1 lg:grid-cols-12 rounded-2xl sm:rounded-3xl md:rounded-[2.25rem] overflow-hidden shadow-2xl shadow-orange-950/10 border border-gray-200/80 bg-white relative z-10 animate-fadeIn">
         
         {/* ── Left Dark Half (Brand & Command Center) ──────────────── */}
-        <div className="lg:col-span-6 bg-[#060814] p-8 md:p-12 flex flex-col justify-between min-h-[460px] relative overflow-hidden text-white">
+        <div className="lg:col-span-6 bg-[#060814] p-6 sm:p-8 md:p-12 flex flex-col justify-between min-h-[380px] sm:min-h-[440px] lg:min-h-[460px] relative overflow-hidden text-white">
           {/* Subtle concentric circular wireframe art in background */}
           <div className="absolute -top-24 -right-24 w-[420px] h-[420px] border border-orange-500/10 rounded-full pointer-events-none" />
           <div className="absolute -top-12 -right-12 w-[320px] h-[320px] border border-orange-500/10 rounded-full pointer-events-none" />
@@ -273,7 +273,7 @@ function UnifiedLoginContent() {
         </div>
 
         {/* ── Right White Half (Login Form & Switcher) ────────────── */}
-        <div className="lg:col-span-6 bg-white p-8 md:p-12 flex flex-col justify-center relative">
+        <div className="lg:col-span-6 bg-white p-6 sm:p-8 md:p-12 flex flex-col justify-center relative">
           
           {/* Top Role Mode Switcher Tabs */}
           <div className="flex bg-gray-100/90 p-1.5 rounded-2xl mb-8 border border-gray-200/60">

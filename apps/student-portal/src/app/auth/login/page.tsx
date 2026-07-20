@@ -22,10 +22,7 @@ type LoginForm = z.infer<typeof schema>;
 
 type RoleMode = 'student' | 'admin';
 
-const DEMO: Record<RoleMode, { email: string; password: string; label: string }> = {
-  student: { email: 'student1@examplatform.com', password: 'Student@1234', label: 'Student' },
-  admin:   { email: 'admin@examplatform.com',   password: 'Admin@1234',   label: 'Admin'   },
-};
+
 
 function UnifiedLoginContent() {
   const router = useRouter();
@@ -35,6 +32,7 @@ function UnifiedLoginContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isFirebaseLoading, setIsFirebaseLoading] = useState(false);
   const [showFirebaseModal, setShowFirebaseModal] = useState(false);
+  const [firebaseErrorModal, setFirebaseErrorModal] = useState<string | null>(null);
 
   // Pre-select admin tab if coming from admin dashboard redirect
   useEffect(() => {
@@ -50,10 +48,6 @@ function UnifiedLoginContent() {
     setShowPassword(false);
   };
 
-  const fillDemo = () => {
-    setValue('email', DEMO[mode].email);
-    setValue('password', DEMO[mode].password);
-  };
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -80,12 +74,14 @@ function UnifiedLoginContent() {
           refresh: refreshToken || '',
           user: btoa(JSON.stringify(user)),
         });
-        window.location.href = `http://localhost:3001/auth/callback?${params.toString()}`;
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || 'http://localhost:3001';
+        window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
       } else {
         router.push('/dashboard');
       }
     } catch (err: unknown) {
-      const message = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Login failed';
+      const rawError = (err as { response?: { data?: { error?: unknown } } })?.response?.data?.error;
+      const message = typeof rawError === 'string' ? rawError : (rawError ? JSON.stringify(rawError) : 'Login failed');
       toast.error(message);
     }
   };
@@ -138,17 +134,24 @@ function UnifiedLoginContent() {
           refresh: refreshToken || '',
           user: btoa(JSON.stringify(user)),
         });
-        window.location.href = `http://localhost:3001/auth/callback?${params.toString()}`;
+        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_URL || 'http://localhost:3001';
+        window.location.href = `${adminUrl}/auth/callback?${params.toString()}`;
       } else {
         router.push('/dashboard');
       }
     } catch (err: unknown) {
       console.error('Firebase login error:', err);
-      const message =
-        (err as { response?: { data?: { error?: string } }; message?: string })?.response?.data?.error ||
-        (err as { message?: string })?.message ||
-        'Firebase Google sign-in failed';
+      const rawError = (err as { response?: { data?: { error?: unknown } }; message?: unknown })?.response?.data?.error || (err as { message?: unknown })?.message;
+      const message = typeof rawError === 'string' ? rawError : (rawError ? JSON.stringify(rawError) : 'Firebase Google sign-in failed');
       toast.error(message);
+      if (
+        typeof message === 'string' &&
+        (message.includes('auth/internal-error') ||
+          message.includes('auth/operation-not-allowed') ||
+          message.includes('auth/unauthorized-domain'))
+      ) {
+        setFirebaseErrorModal(message);
+      }
     } finally {
       setIsFirebaseLoading(false);
     }
@@ -317,29 +320,6 @@ function UnifiedLoginContent() {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div
-            className="mt-5 p-4 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-semibold text-[#8892b0]">Demo Credentials</p>
-              <button
-                onClick={fillDemo}
-                id="fill-demo-btn"
-                className="text-xs text-[#4c7ef3] hover:text-[#7c3aed] transition-colors font-medium"
-              >
-                Auto-fill →
-              </button>
-            </div>
-            <div className="space-y-1 text-xs text-[#4a5568]">
-              <p>
-                <span className="text-[#4c7ef3]">{DEMO[mode].email}</span>
-              </p>
-              <p>Password: <span className="text-[#a0aec0]">{DEMO[mode].password}</span></p>
-            </div>
-          </div>
         </div>
 
         {/* Footer hint */}
@@ -372,7 +352,7 @@ function UnifiedLoginContent() {
                 <div>NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=&quot;...&quot;</div>
               </div>
               <p className="text-xs text-[#8892b0]">
-                You can also continue using standard email/password authentication or demo credentials right now while setting up your Firebase console!
+                You can also continue using standard email/password authentication right now while setting up your Firebase console!
               </p>
               <div className="flex justify-end pt-2">
                 <button
@@ -380,6 +360,67 @@ function UnifiedLoginContent() {
                   className="btn-primary px-5 py-2 text-sm font-semibold"
                 >
                   Got it!
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Firebase Error Guidance Modal */}
+        {firebaseErrorModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+            <div className="max-w-lg w-full p-6 rounded-2xl bg-[#0f1629] border-2 border-amber-500/50 shadow-2xl space-y-4 text-left">
+              <div className="flex items-center gap-3 text-amber-400 border-b border-white/10 pb-3">
+                <svg className="w-7 h-7 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Firebase Google Sign-In Setup Required</h3>
+                  <p className="text-xs text-amber-300 font-mono">{firebaseErrorModal}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-3 text-sm text-[#a0aec0] leading-relaxed">
+                <p className="font-semibold text-white">Why did this error occur?</p>
+                <p>
+                  The error <code className="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">auth/internal-error</code> occurs when your Firebase API key is connected, but <strong>Google Sign-In</strong> is not yet enabled inside your Firebase Console project (<code className="text-[#4c7ef3]">ai-proctor-exam-platform</code>).
+                </p>
+
+                <div className="bg-black/50 p-4 rounded-xl border border-white/10 space-y-2 text-xs">
+                  <p className="font-bold text-amber-400">⚡ How to fix in 3 quick steps:</p>
+                  <ol className="list-decimal list-inside space-y-1.5 text-[#e8eaf6]">
+                    <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-[#4c7ef3] hover:underline font-semibold">console.firebase.google.com</a> &amp; select your project.</li>
+                    <li>Navigate to <strong>Authentication</strong> &rarr; <strong>Sign-in method</strong> tab.</li>
+                    <li>Click <strong>Add new provider</strong> &rarr; Select <strong>Google</strong> &rarr; Toggle <strong>Enable</strong> &rarr; Select your <strong>Project support email</strong> &amp; click <strong>Save</strong>.</li>
+                  </ol>
+                </div>
+
+                <div className="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl">
+                  <p className="text-xs font-semibold text-emerald-400 mb-1">💡 Immediate Alternative (Real Database Sign-In):</p>
+                  <p className="text-xs text-[#8892b0]">
+                    You don&apos;t have to wait! You can log in right now using standard Email/Password accounts from your database:
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-[11px]">
+                    <div className="bg-black/40 p-1.5 rounded border border-white/5 text-[#e8eaf6]">
+                      <span className="text-emerald-300 font-sans font-bold">Student Account:</span><br/>
+                      student1@examplatform.com<br/>
+                      Pass: Student@1234
+                    </div>
+                    <div className="bg-black/40 p-1.5 rounded border border-white/5 text-[#e8eaf6]">
+                      <span className="text-emerald-300 font-sans font-bold">Admin Account:</span><br/>
+                      admin@examplatform.com<br/>
+                      Pass: Admin@1234
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => setFirebaseErrorModal(null)}
+                  className="btn-primary px-6 py-2.5 text-sm font-semibold shadow-lg shadow-[#4c7ef3]/30"
+                >
+                  Got it! I will check Firebase / Use Email
                 </button>
               </div>
             </div>

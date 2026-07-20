@@ -94,7 +94,9 @@ export default function AdminSettingsPage() {
       });
       toast.success('Settings saved successfully');
     } catch (err: any) {
-      toast.error(err?.response?.data?.error || 'Failed to save settings');
+      const rawError = err?.response?.data?.error;
+      const message = typeof rawError === 'string' ? rawError : (rawError ? JSON.stringify(rawError) : 'Failed to save settings');
+      toast.error(message);
     } finally {
       setSaving(false);
     }

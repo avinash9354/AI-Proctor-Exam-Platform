@@ -65,10 +65,17 @@ function formatApiError(error: any) {
 // ─── Response interceptor: auto-refresh on 401 ───────────────────────────────
 async function handleRefresh(error: any) {
   const formattedError = formatApiError(error);
+  const state = useAuthStore.getState();
+  const isDemoUser = state.accessToken === 'demo-jwt-token' || state.user?.id?.startsWith('demo-');
+  
+  if (isDemoUser) {
+    return Promise.reject(formattedError);
+  }
+
   if (formattedError.response?.status === 401 && !formattedError.config._retry) {
     formattedError.config._retry = true;
     const { refreshToken, setAuth, clearAuth } = useAuthStore.getState();
-    if (refreshToken) {
+    if (refreshToken && refreshToken !== 'demo-jwt-refresh') {
       try {
         const res = await axios.post(`${AUTH_URL}/v1/auth/refresh`, { refreshToken });
         const { accessToken: newAccess, refreshToken: newRefresh } = res.data.data;
@@ -79,6 +86,13 @@ async function handleRefresh(error: any) {
         return axios(formattedError.config);
       } catch {
         clearAuth();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
+      }
+    } else {
+      clearAuth();
+      if (typeof window !== 'undefined') {
         window.location.href = '/auth/login';
       }
     }

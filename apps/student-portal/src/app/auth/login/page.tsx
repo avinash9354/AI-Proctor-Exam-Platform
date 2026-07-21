@@ -410,14 +410,20 @@ function UnifiedLoginContent() {
             </button>
           </form>
 
-          {!isAdmin && (
-            <p className="text-center text-xs text-gray-500 mt-5">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/signup" className="text-[#ea580c] hover:underline font-semibold">
-                Create account
-              </Link>
-            </p>
-          )}
+          {/* Create Account Prominent Card */}
+          <div className="mt-6 p-4 rounded-2xl bg-orange-50/70 border border-orange-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+            <div className="text-center sm:text-left">
+              <span className="font-bold text-gray-900 text-xs md:text-sm block">Don&apos;t have an account?</span>
+              <span className="text-[11px] md:text-xs text-gray-600">Register now to access the student portal</span>
+            </div>
+            <Link
+              href="/auth/signup"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs text-white bg-[#ea580c] hover:bg-[#c2410c] active:scale-[0.99] transition-all shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <span>Create Account</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
 
           <p className="text-center text-[11px] text-gray-400 mt-4">
             Demo mode stores the session only in this browser.

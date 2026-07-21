@@ -8,14 +8,70 @@ import { BookOpen, Clock, CheckCircle, TrendingUp, AlertTriangle } from 'lucide-
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
 
-  const { data: upcomingExams, isLoading: loadingUpcoming } = useQuery({
+  const { data: upcomingExams = [], isLoading: loadingUpcoming } = useQuery({
     queryKey: ['exams', 'upcoming'],
-    queryFn: () => examClient.get('/exams?status=upcoming').then((r) => r.data.data),
+    queryFn: async () => {
+      const state = useAuthStore.getState();
+      const isDemo = state.accessToken === 'demo-jwt-token' || state.user?.id?.startsWith('demo-');
+      if (isDemo) {
+        return [
+          {
+            id: 'demo-exam-101',
+            title: 'Midterm Examination: Advanced Algorithms & AI',
+            courseCode: 'CS-402',
+            startTime: new Date(Date.now() + 3600000 * 24).toISOString(),
+            durationMinutes: 90,
+            status: 'upcoming',
+            proctoringMode: 'ai_proctor',
+            instructions: 'Ensure camera and microphone permissions are enabled before starting the assessment.',
+          },
+          {
+            id: 'demo-exam-102',
+            title: 'System Architecture & Distributed Computing',
+            courseCode: 'CS-408',
+            startTime: new Date(Date.now() + 3600000 * 72).toISOString(),
+            durationMinutes: 120,
+            status: 'upcoming',
+            proctoringMode: 'ai_proctor',
+            instructions: 'Closed-book examination. 360° AI integrity monitoring active.',
+          }
+        ];
+      }
+      try {
+        const res = await examClient.get('/exams?status=upcoming');
+        return res.data.data || [];
+      } catch {
+        return [];
+      }
+    },
   });
 
-  const { data: completedExams, isLoading: loadingCompleted } = useQuery({
+  const { data: completedExams = [], isLoading: loadingCompleted } = useQuery({
     queryKey: ['exams', 'completed'],
-    queryFn: () => examClient.get('/exams?status=completed').then((r) => r.data.data),
+    queryFn: async () => {
+      const state = useAuthStore.getState();
+      const isDemo = state.accessToken === 'demo-jwt-token' || state.user?.id?.startsWith('demo-');
+      if (isDemo) {
+        return [
+          {
+            id: 'demo-exam-prev-1',
+            title: 'Data Structures & Complex Analysis Quiz',
+            courseCode: 'CS-305',
+            startTime: new Date(Date.now() - 3600000 * 48).toISOString(),
+            durationMinutes: 60,
+            status: 'completed',
+            score: 92,
+            maxScore: 100,
+          }
+        ];
+      }
+      try {
+        const res = await examClient.get('/exams?status=completed');
+        return res.data.data || [];
+      } catch {
+        return [];
+      }
+    },
   });
 
   const hour = new Date().getHours();

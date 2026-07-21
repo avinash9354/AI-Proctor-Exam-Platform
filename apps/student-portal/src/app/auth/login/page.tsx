@@ -204,7 +204,7 @@ function UnifiedLoginContent() {
 
       {/* Main Split Card Container */}
       <div className="w-full max-w-[1040px] grid grid-cols-1 lg:grid-cols-12 rounded-2xl sm:rounded-3xl md:rounded-[2.25rem] overflow-hidden shadow-2xl shadow-orange-950/10 border border-gray-200/80 bg-white relative z-10 animate-fadeIn">
-        
+
         {/* ── Left Dark Half (Brand & Command Center) ──────────────── */}
         <div className="lg:col-span-6 bg-[#060814] p-6 sm:p-8 md:p-12 flex flex-col justify-between min-h-[380px] sm:min-h-[440px] lg:min-h-[460px] relative overflow-hidden text-white">
           {/* Subtle concentric circular wireframe art in background */}
@@ -274,17 +274,16 @@ function UnifiedLoginContent() {
 
         {/* ── Right White Half (Login Form & Switcher) ────────────── */}
         <div className="lg:col-span-6 bg-white p-6 sm:p-8 md:p-12 flex flex-col justify-center relative">
-          
+
           {/* Top Role Mode Switcher Tabs */}
           <div className="flex bg-gray-100/90 p-1.5 rounded-2xl mb-8 border border-gray-200/60">
             <button
               type="button"
               onClick={() => switchMode('student')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                mode === 'student'
-                  ? 'bg-white text-gray-900 shadow-md font-bold'
-                  : 'text-gray-500 hover:text-gray-900'
-              }`}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'student'
+                ? 'bg-white text-gray-900 shadow-md font-bold'
+                : 'text-gray-500 hover:text-gray-900'
+                }`}
             >
               <GraduationCap className="w-4 h-4" />
               <span>Student Portal</span>
@@ -292,11 +291,10 @@ function UnifiedLoginContent() {
             <button
               type="button"
               onClick={() => switchMode('admin')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                mode === 'admin'
-                  ? 'bg-white text-gray-900 shadow-md font-bold'
-                  : 'text-gray-500 hover:text-gray-900'
-              }`}
+              className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'admin'
+                ? 'bg-white text-gray-900 shadow-md font-bold'
+                : 'text-gray-500 hover:text-gray-900'
+                }`}
             >
               <Users className="w-4 h-4" />
               <span>Admin & Teacher</span>
@@ -336,7 +334,7 @@ function UnifiedLoginContent() {
                   <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7.1C.6 9.1 0 10.7 0 12.3s.6 3.2 1.6 5.2l3.7-2.7z" />
                   <path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 16.3C3.5 20.1 7.4 23.5 12 23.5z" />
                 </svg>
-                <span>Sign in with Google (Firebase)</span>
+                <span>Sign in with Google </span>
               </>
             )}
           </button>
@@ -473,7 +471,7 @@ function UnifiedLoginContent() {
                 <p className="text-xs text-gray-500 font-mono">{firebaseErrorModal}</p>
               </div>
             </div>
-            
+
             <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
               <p className="font-semibold text-gray-900">Why did this occur?</p>
               <p>

@@ -149,7 +149,7 @@ export default function SignupPage() {
                   <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7.1C.6 9.1 0 10.7 0 12.3s.6 3.2 1.6 5.2l3.7-2.7z" />
                   <path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.3-6.7-5.3L1.6 16.3C3.5 20.1 7.4 23.5 12 23.5z" />
                 </svg>
-                <span>Sign up with Google (Firebase)</span>
+                <span>Sign up with Google</span>
               </>
             )}
           </button>
@@ -270,7 +270,7 @@ export default function SignupPage() {
                   <p className="text-xs text-amber-300 font-mono">{firebaseErrorModal}</p>
                 </div>
               </div>
-              
+
               <div className="space-y-3 text-sm text-[#a0aec0] leading-relaxed">
                 <p className="font-semibold text-white">Why did this error occur?</p>
                 <p>
@@ -293,13 +293,13 @@ export default function SignupPage() {
                   </p>
                   <div className="mt-2 grid grid-cols-2 gap-2 font-mono text-[11px]">
                     <div className="bg-black/40 p-1.5 rounded border border-white/5 text-[#e8eaf6]">
-                      <span className="text-emerald-300 font-sans font-bold">Student Account:</span><br/>
-                      student1@examplatform.com<br/>
+                      <span className="text-emerald-300 font-sans font-bold">Student Account:</span><br />
+                      student1@examplatform.com<br />
                       Pass: Student@1234
                     </div>
                     <div className="bg-black/40 p-1.5 rounded border border-white/5 text-[#e8eaf6]">
-                      <span className="text-emerald-300 font-sans font-bold">Admin Account:</span><br/>
-                      admin@examplatform.com<br/>
+                      <span className="text-emerald-300 font-sans font-bold">Admin Account:</span><br />
+                      admin@examplatform.com<br />
                       Pass: Admin@1234
                     </div>
                   </div>

@@ -206,7 +206,7 @@ function UnifiedLoginContent() {
       <div className="w-full max-w-[1040px] grid grid-cols-1 lg:grid-cols-12 rounded-2xl sm:rounded-3xl md:rounded-[2.25rem] overflow-hidden shadow-2xl shadow-orange-950/10 border border-gray-200/80 bg-white relative z-10 animate-fadeIn">
 
         {/* ── Left Dark Half (Brand & Command Center) ──────────────── */}
-        <div className="lg:col-span-6 bg-[#060814] p-6 sm:p-8 md:p-12 flex flex-col justify-between min-h-[380px] sm:min-h-[440px] lg:min-h-[460px] relative overflow-hidden text-white">
+        <div className="lg:col-span-6 bg-[#060814] p-6 sm:p-8 lg:p-9 flex flex-col justify-between min-h-[360px] sm:min-h-[400px] lg:min-h-[440px] relative overflow-hidden text-white">
           {/* Subtle concentric circular wireframe art in background */}
           <div className="absolute -top-24 -right-24 w-[420px] h-[420px] border border-orange-500/10 rounded-full pointer-events-none" />
           <div className="absolute -top-12 -right-12 w-[320px] h-[320px] border border-orange-500/10 rounded-full pointer-events-none" />
@@ -214,28 +214,28 @@ function UnifiedLoginContent() {
 
           {/* Top Brand & Subtitle */}
           <div className="flex items-center gap-3 relative z-10">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#f97316] to-[#ea580c] flex items-center justify-center shadow-lg shadow-orange-500/30 shrink-0">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#f97316] to-[#ea580c] flex items-center justify-center shadow-lg shadow-orange-500/30 shrink-0">
+              <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight leading-none">ExamGuard</h2>
-              <span className="text-[11px] font-semibold tracking-widest uppercase text-orange-400 mt-1 block">
+              <h2 className="text-base font-bold text-white tracking-tight leading-none">ExamGuard</h2>
+              <span className="text-[10px] font-semibold tracking-widest uppercase text-orange-400 mt-1 block">
                 {isAdmin ? 'ADMIN CONTROL' : 'STUDENT PORTAL'}
               </span>
             </div>
           </div>
 
           {/* Middle Hero Statement */}
-          <div className="my-auto py-8 relative z-10">
-            <span className="text-xs font-bold tracking-widest uppercase text-[#f97316] block mb-3">
+          <div className="my-auto py-4 relative z-10">
+            <span className="text-[11px] font-bold tracking-widest uppercase text-[#f97316] block mb-2">
               {isAdmin ? 'SECURE OPERATIONS' : 'INTELLIGENT PROCTORING'}
             </span>
-            <h1 className="text-3xl md:text-[38px] font-extrabold text-white tracking-tight leading-[1.15] mb-4">
+            <h1 className="text-2xl md:text-[32px] font-extrabold text-white tracking-tight leading-[1.15] mb-3">
               {isAdmin
                 ? 'Every exam signal, in one calm command center.'
                 : 'Your AI-powered secure examination environment.'}
             </h1>
-            <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+            <p className="text-xs text-gray-400 leading-relaxed max-w-sm">
               {isAdmin
                 ? 'Real-time proctoring feeds, AI integrity risk scores, and automated proctor oversight across all active exams.'
                 : 'Experience seamless AI proctoring with 360° integrity monitoring, instant verification, and calm focus.'}
@@ -243,28 +243,28 @@ function UnifiedLoginContent() {
           </div>
 
           {/* Bottom Feature Tags */}
-          <div className="flex flex-wrap gap-2 pt-4 relative z-10">
+          <div className="flex flex-wrap gap-2 pt-2 relative z-10">
             {isAdmin ? (
               <>
-                <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-gray-300">
                   Live monitoring
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-gray-300">
                   Risk review
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-gray-300">
                   Exam scheduling
                 </span>
               </>
             ) : (
               <>
-                <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-gray-300">
                   AI Face Tracking
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-gray-300">
                   360° Anti-Cheat
                 </span>
-                <span className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-gray-300">
+                <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-gray-300">
                   Instant Results
                 </span>
               </>
@@ -273,15 +273,15 @@ function UnifiedLoginContent() {
         </div>
 
         {/* ── Right White Half (Login Form & Switcher) ────────────── */}
-        <div className="lg:col-span-6 bg-white p-6 sm:p-8 md:p-12 flex flex-col justify-center relative">
+        <div className="lg:col-span-6 bg-white p-6 sm:p-8 lg:p-9 flex flex-col justify-center relative">
 
           {/* Top Role Mode Switcher Tabs */}
-          <div className="flex bg-gray-100/90 p-1.5 rounded-2xl mb-8 border border-gray-200/60">
+          <div className="flex bg-gray-100/90 p-1 rounded-xl mb-5 border border-gray-200/60">
             <button
               type="button"
               onClick={() => switchMode('student')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'student'
-                ? 'bg-white text-gray-900 shadow-md font-bold'
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 ${mode === 'student'
+                ? 'bg-white text-gray-900 shadow-sm font-bold'
                 : 'text-gray-500 hover:text-gray-900'
                 }`}
             >
@@ -291,8 +291,8 @@ function UnifiedLoginContent() {
             <button
               type="button"
               onClick={() => switchMode('admin')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${mode === 'admin'
-                ? 'bg-white text-gray-900 shadow-md font-bold'
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 ${mode === 'admin'
+                ? 'bg-white text-gray-900 shadow-sm font-bold'
                 : 'text-gray-500 hover:text-gray-900'
                 }`}
             >
@@ -302,18 +302,22 @@ function UnifiedLoginContent() {
           </div>
 
           {/* Subheader & Icon */}
-          <div className="mb-6">
-            <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-[#ea580c] mb-4 shadow-sm">
-              <Sparkles className="w-5 h-5" />
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-1.5">
+              <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-[#ea580c] shadow-2xs shrink-0">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold tracking-widest uppercase text-[#ea580c] block leading-tight">
+                  DASHBOARD ACCESS
+                </span>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight leading-tight">
+                  Welcome back
+                </h3>
+              </div>
             </div>
-            <span className="text-[11px] font-bold tracking-widest uppercase text-[#ea580c] block mb-1">
-              DASHBOARD ACCESS
-            </span>
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
-              Welcome back
-            </h3>
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-              Open the deployed demo dashboard directly, sign in via Google Firebase, or enter your registered credentials.
+            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed line-clamp-2">
+              Open the deployed demo dashboard directly, sign in via Google Firebase, or enter your credentials.
             </p>
           </div>
 
@@ -322,10 +326,10 @@ function UnifiedLoginContent() {
             type="button"
             onClick={handleFirebaseGoogleLogin}
             disabled={isFirebaseLoading || isSubmitting}
-            className="w-full py-3 px-4 mb-5 rounded-xl flex items-center justify-center gap-3 font-semibold text-gray-700 bg-white border border-gray-200/90 shadow-sm hover:bg-gray-50 hover:border-gray-300 active:scale-[0.99] transition-all text-sm"
+            className="w-full py-2.5 px-4 mb-3.5 rounded-xl flex items-center justify-center gap-2.5 font-semibold text-gray-700 bg-white border border-gray-200/90 shadow-2xs hover:bg-gray-50 hover:border-gray-300 active:scale-[0.99] transition-all text-xs md:text-sm"
           >
             {isFirebaseLoading ? (
-              <span className="w-5 h-5 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+              <span className="w-4 h-4 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
             ) : (
               <>
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -339,15 +343,15 @@ function UnifiedLoginContent() {
             )}
           </button>
 
-          <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-3.5">
             <div className="flex-1 h-px bg-gray-200" />
             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">OR WITH EMAIL</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
             <div>
-              <label htmlFor="login-email" className="block text-xs font-semibold text-gray-700 mb-1.5">Email Address</label>
+              <label htmlFor="login-email" className="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -355,14 +359,14 @@ function UnifiedLoginContent() {
                   type="email"
                   id="login-email"
                   placeholder={isAdmin ? 'admin@examplatform.com' : 'student@example.com'}
-                  className="w-full py-3 pl-10 pr-4 rounded-xl text-sm text-gray-900 bg-gray-50/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c] focus:bg-white transition-all"
+                  className="w-full py-2.5 pl-10 pr-4 rounded-xl text-xs md:text-sm text-gray-900 bg-gray-50/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c] focus:bg-white transition-all"
                 />
               </div>
               {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="login-password" className="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+              <label htmlFor="login-password" className="block text-xs font-semibold text-gray-700 mb-1">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -370,7 +374,7 @@ function UnifiedLoginContent() {
                   type={showPassword ? 'text' : 'password'}
                   id="login-password"
                   placeholder="••••••••"
-                  className="w-full py-3 pl-10 pr-10 rounded-xl text-sm text-gray-900 bg-gray-50/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c] focus:bg-white transition-all"
+                  className="w-full py-2.5 pl-10 pr-10 rounded-xl text-xs md:text-sm text-gray-900 bg-gray-50/70 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#ea580c] focus:bg-white transition-all"
                 />
                 <button
                   type="button"
@@ -387,10 +391,10 @@ function UnifiedLoginContent() {
               type="submit"
               disabled={isSubmitting}
               id="login-submit-btn"
-              className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50 mt-2 text-sm"
+              className="w-full py-2.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md shadow-orange-500/20 disabled:opacity-50 mt-1 text-xs md:text-sm"
             >
               {isSubmitting ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <span>Sign In</span>
@@ -403,29 +407,28 @@ function UnifiedLoginContent() {
             <button
               type="button"
               onClick={handleDemoLogin}
-              className="w-full py-3 px-6 rounded-xl font-bold text-[#ea580c] bg-[#fff7ed] hover:bg-[#ffedd5] border border-orange-200 active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm mt-1"
+              className="w-full py-2.5 px-6 rounded-xl font-bold text-[#ea580c] bg-[#fff7ed] hover:bg-[#ffedd5] border border-orange-200 active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-xs md:text-sm mt-1"
             >
               <span>Enter demo dashboard</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Create Account Prominent Card */}
-          <div className="mt-6 p-4 rounded-2xl bg-orange-50/70 border border-orange-200/80 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
-            <div className="text-center sm:text-left">
-              <span className="font-bold text-gray-900 text-xs md:text-sm block">Don&apos;t have an account?</span>
-              <span className="text-[11px] md:text-xs text-gray-600">Register now to access the student portal</span>
-            </div>
+          {/* Create Account Prominent & Sleek Horizontal Strip */}
+          <div className="mt-4 py-2.5 px-4 rounded-xl bg-orange-50/70 border border-orange-200/80 flex items-center justify-between gap-3 text-xs shadow-2xs">
+            <span className="text-gray-700 font-medium">
+              Don&apos;t have an account?
+            </span>
             <Link
               href="/auth/signup"
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs text-white bg-[#ea580c] hover:bg-[#c2410c] active:scale-[0.99] transition-all shadow-md shadow-orange-500/20 flex items-center justify-center gap-1.5 shrink-0"
+              className="font-bold text-[#ea580c] hover:text-[#c2410c] flex items-center gap-1 hover:underline transition-all shrink-0"
             >
               <span>Create Account</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          <p className="text-center text-[11px] text-gray-400 mt-4">
+          <p className="text-center text-[10px] text-gray-400 mt-2.5">
             Demo mode stores the session only in this browser.
           </p>
         </div>
